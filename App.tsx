@@ -11,6 +11,7 @@ import { Settings } from './components/Settings';
 import { Portfolio } from './components/Portfolio';
 import { UserProfile } from './components/UserProfile';
 import { Leaderboard } from './components/Leaderboard';
+import { Protocol } from './components/Protocol';
 import { WalletContext, UserContext } from './types';
 import { ToastProvider } from './components/Toast';
 import { PieChart } from 'lucide-react';
@@ -168,6 +169,7 @@ const App: React.FC = () => {
                           <Route path="/portfolio" element={<Portfolio />} />
                           <Route path="/security" element={<SecurityScanner />} />
                           <Route path="/settings" element={<Settings />} />
+                          <Route path="/protocol" element={<Protocol />} />
                           <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
                       </div>

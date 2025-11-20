@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export interface VideoAsset {
@@ -61,6 +62,8 @@ export interface Creator {
   change24h: number;
   isVerified: boolean;
 }
+
+export type ProtocolTab = 'manifesto' | 'architecture';
 
 export interface WalletContextType {
   connected: boolean;

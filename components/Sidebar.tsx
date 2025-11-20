@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Video, ShieldCheck, Activity, Settings, PieChart, Trophy, Plus } from 'lucide-react';
+import { Home, Video, ShieldCheck, Activity, Settings, PieChart, Trophy, Plus, ScrollText } from 'lucide-react';
 
 interface SidebarProps {
   mobile?: boolean;
@@ -28,6 +28,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobile }) => {
     { path: '/leaderboard', icon: Trophy, label: 'Elite 100' },
     { path: '/portfolio', icon: PieChart, label: 'Portfolio' },
     { path: '/security', icon: ShieldCheck, label: 'Rug Scanner' },
+    { path: '/protocol', icon: ScrollText, label: 'Protocol Spec', highlight: true },
     { path: '/settings', icon: Settings, label: 'Settings' },
   ];
 
@@ -111,10 +112,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobile }) => {
                 ${active 
                   ? 'bg-amber-900/20 text-amber-400 border border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]' 
                   : 'text-slate-500 hover:text-slate-200 hover:bg-slate-900'}
+                ${item.highlight && !active ? 'text-amber-500/80' : ''}
               `}
             >
-              <item.icon size={22} className={active ? "text-amber-400" : ""} />
+              <item.icon size={22} className={active ? "text-amber-400" : (item.highlight ? "text-amber-500/70" : "")} />
               <span>{item.label}</span>
+              {item.highlight && (
+                  <span className="ml-auto w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+              )}
             </Link>
           );
         })}
