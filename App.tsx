@@ -89,9 +89,9 @@ const App: React.FC = () => {
         disconnect: disconnectWallet 
       }}>
         <Router>
-          <div className="flex h-screen bg-slate-950 text-slate-200 overflow-hidden selection:bg-purple-500 selection:text-white">
+          <div className="flex h-screen bg-black text-slate-200 overflow-hidden selection:bg-amber-500/30 selection:text-amber-200">
             {/* Sidebar */}
-            <div className="hidden md:flex w-64 flex-col border-r border-slate-800 bg-slate-900/50 backdrop-blur-xl">
+            <div className="hidden md:flex w-64 flex-col border-r border-slate-800 bg-slate-950 backdrop-blur-xl">
               <Sidebar />
             </div>
 
@@ -99,12 +99,12 @@ const App: React.FC = () => {
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
               
               {/* Top Bar */}
-              <header className="h-16 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md flex items-center justify-between px-6 z-20">
-                <div className="md:hidden font-bold text-xl tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">
+              <header className="h-16 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md flex items-center justify-between px-6 z-20">
+                <div className="md:hidden font-bold text-xl tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-600">
                   KINECTIC
                 </div>
-                <div className="hidden md:block font-medium text-slate-400">
-                  Solana Mainnet <span className="w-2 h-2 rounded-full bg-green-500 inline-block ml-2 animate-pulse"></span>
+                <div className="hidden md:block font-medium text-slate-400 text-xs uppercase tracking-wider">
+                  Solana Mainnet <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block ml-2 animate-pulse"></span>
                 </div>
                 <div className="flex items-center gap-4">
                   <WalletButton />
@@ -113,10 +113,11 @@ const App: React.FC = () => {
 
               {/* Main Scrollable Area */}
               <main className="flex-1 overflow-y-auto p-4 md:p-8 relative scroll-smooth">
-                 {/* Dynamic Background Gradient */}
+                 {/* Dynamic Background Gradient (Gold Theme) */}
                  <div className="fixed inset-0 pointer-events-none z-0">
-                    <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px]" />
-                    <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-cyan-600/10 rounded-full blur-[100px]" />
+                    <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-amber-600/10 rounded-full blur-[120px]" />
+                    <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-slate-800/20 rounded-full blur-[120px]" />
+                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay"></div>
                  </div>
                  
                  <div className="relative z-10 max-w-5xl mx-auto">
@@ -133,7 +134,7 @@ const App: React.FC = () => {
               </main>
 
               {/* Mobile Bottom Nav */}
-              <div className="md:hidden border-t border-slate-800 bg-slate-900 p-4">
+              <div className="md:hidden border-t border-slate-800 bg-slate-950 p-4">
                 <Sidebar mobile />
               </div>
             </div>
