@@ -1,29 +1,43 @@
 import { GoogleGenAI } from "@google/genai";
 
-// Initialize generic client - Key will be injected by AI Studio environment or checked via window.aistudio
+// Robust API Key retrieval for Vite/Vercel environment
+const getApiKey = () => {
+    // 1. Try Standard Process Env (polyfilled in vite.config.ts)
+    // The build tool (Vite) replaces process.env.API_KEY with the actual string value.
+    // We access it directly to ensure the replacement happens.
+    if (process.env.API_KEY) {
+        return process.env.API_KEY;
+    }
+    return undefined;
+};
+
+// Initialize generic client
 const getClient = () => {
-    // In the AI Studio environment, the key is injected into process.env.API_KEY
-    // However, for Veo, we need to ensure the user has selected a key if using that specific flow.
-    return new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = getApiKey();
+    // Note: If apiKey is undefined here, the SDK might throw or user must select key via window.aistudio
+    return new GoogleGenAI({ apiKey: apiKey || '' });
 };
 
 export const checkApiKey = async (): Promise<boolean> => {
   if (window.aistudio && window.aistudio.hasSelectedApiKey) {
     return await window.aistudio.hasSelectedApiKey();
   }
-  return true; // Fallback for environments where the key is purely env var based
+  return !!getApiKey();
 };
 
 export const promptApiKeySelection = async () => {
   if (window.aistudio && window.aistudio.openSelectKey) {
     await window.aistudio.openSelectKey();
   } else {
-    alert("API Key selection is not supported in this environment. Please ensure API_KEY is set.");
+    // Fallback for Vercel/Production if key is missing
+    console.warn("API Key selection not supported in this environment. Please set VITE_API_KEY in Vercel.");
+    alert("Please configure VITE_API_KEY in your environment settings.");
   }
 };
 
 export const generateVeoVideo = async (prompt: string): Promise<string> => {
   const ai = getClient();
+  const apiKey = getApiKey();
   
   // 1. Start Video Generation Operation
   let operation = await ai.models.generateVideos({
@@ -31,15 +45,13 @@ export const generateVeoVideo = async (prompt: string): Promise<string> => {
     prompt: prompt,
     config: {
       numberOfVideos: 1,
-      resolution: '720p', // 720p is standard for fast preview
+      resolution: '720p',
       aspectRatio: '16:9'
     }
   });
 
   // 2. Poll for completion
-  // Note: This can take a minute or two.
   while (!operation.done) {
-    // Wait 10 seconds between polls
     await new Promise(resolve => setTimeout(resolve, 10000));
     operation = await ai.operations.getVideosOperation({ operation: operation });
     console.log("Veo Status:", operation.metadata);
@@ -57,8 +69,9 @@ export const generateVeoVideo = async (prompt: string): Promise<string> => {
   }
 
   // 4. Fetch the actual video bytes
-  // IMPORTANT: We must append the API key to the download link.
-  const downloadUrl = `${videoUri}&key=${process.env.API_KEY}`;
+  // Append key if available
+  const downloadUrl = apiKey ? `${videoUri}&key=${apiKey}` : videoUri;
+  
   const response = await fetch(downloadUrl);
   if (!response.ok) {
       throw new Error(`Failed to download video: ${response.statusText}`);
@@ -88,7 +101,7 @@ export const analyzeTokenSecurity = async (tokenAddress: string, contractSnippet
   `;
 
   const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-preview', // Using Pro model for complex reasoning/coding tasks
+    model: 'gemini-3-pro-preview', 
     contents: prompt,
   });
 
