@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Creator } from '../types';
 import { Crown, TrendingUp, UserPlus } from 'lucide-react';
@@ -15,16 +16,40 @@ export const Leaderboard: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto pb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
       
-      <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center p-4 bg-gradient-to-b from-amber-500/20 to-transparent rounded-full mb-4 border border-amber-500/30">
-              <Crown size={48} className="text-amber-400 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]" />
+      <div className="text-center mb-8 md:mb-12">
+          <div className="inline-flex items-center justify-center p-3 md:p-4 bg-gradient-to-b from-amber-500/20 to-transparent rounded-full mb-4 border border-amber-500/30">
+              <Crown size={32} className="text-amber-400 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] md:w-12 md:h-12" />
           </div>
-          <h2 className="text-4xl font-bold text-white tracking-tight mb-2 font-[Space_Grotesk]">THE ELITE 100</h2>
-          <p className="text-slate-400 text-sm uppercase tracking-widest">Top Capitalized Creators by Market Value</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2 font-[Space_Grotesk]">THE ELITE 100</h2>
+          <p className="text-slate-400 text-xs md:text-sm uppercase tracking-widest">Top Capitalized Creators</p>
       </div>
 
-      <div className="bg-slate-900/50 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
-          {/* Header */}
+      {/* Mobile: Card List View */}
+      <div className="md:hidden space-y-3">
+        {MOCK_CREATORS.map((creator) => (
+            <div key={creator.handle} className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex items-center gap-4 shadow-lg">
+                <div className="text-xl font-bold text-slate-500 font-mono">#{creator.rank}</div>
+                <Link to={`/u/${creator.handle.replace('@','')}`} className="relative">
+                    <img src={creator.avatar} className="w-12 h-12 rounded-full border border-slate-700" />
+                    {creator.isVerified && <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-cyan-500 rounded-full border-2 border-slate-900" />}
+                </Link>
+                <div className="flex-1 min-w-0">
+                    <div className="font-bold text-white truncate">{creator.name}</div>
+                    <div className="text-xs text-slate-500 truncate">{creator.handle}</div>
+                    <div className="flex items-center gap-2 mt-1">
+                         <span className="text-xs font-mono text-amber-400">${(creator.marketCap / 1000000).toFixed(1)}M</span>
+                         <span className={`text-xs ${creator.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>{creator.change24h}%</span>
+                    </div>
+                </div>
+                <button className="p-2 bg-amber-900/20 text-amber-400 rounded-lg border border-amber-500/20">
+                    <TrendingUp size={18} />
+                </button>
+            </div>
+        ))}
+      </div>
+
+      {/* Desktop: Table View */}
+      <div className="hidden md:block bg-slate-900/50 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
           <div className="grid grid-cols-12 gap-4 p-4 border-b border-slate-800 bg-slate-950/50 text-xs text-slate-500 uppercase font-bold tracking-wider">
               <div className="col-span-1 text-center">Rank</div>
               <div className="col-span-5">Creator</div>
@@ -32,15 +57,12 @@ export const Leaderboard: React.FC = () => {
               <div className="col-span-3 text-right">Action</div>
           </div>
 
-          {/* Rows */}
           <div className="divide-y divide-slate-800/50">
               {MOCK_CREATORS.map((creator) => (
                   <div key={creator.handle} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-slate-800/30 transition-colors group">
-                      
                       <div className="col-span-1 text-center font-mono font-bold text-slate-400 group-hover:text-amber-400">
                           {creator.rank}
                       </div>
-                      
                       <div className="col-span-5 flex items-center gap-3">
                           <Link to={`/u/${creator.handle.replace('@','')}`}>
                             <img src={creator.avatar} alt={creator.name} className="w-10 h-10 rounded-full border border-slate-700 group-hover:border-amber-500 transition-colors" />
@@ -53,14 +75,12 @@ export const Leaderboard: React.FC = () => {
                               <div className="text-xs text-slate-500 font-mono">{creator.handle}</div>
                           </div>
                       </div>
-
                       <div className="col-span-3 text-right">
                           <div className="font-mono font-bold text-white">${(creator.marketCap / 1000000).toFixed(1)}M</div>
                           <div className={`text-xs font-bold ${creator.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                               {creator.change24h >= 0 ? '+' : ''}{creator.change24h}%
                           </div>
                       </div>
-
                       <div className="col-span-3 flex justify-end gap-2">
                           <button className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 transition-colors">
                               <UserPlus size={16} />
@@ -69,7 +89,6 @@ export const Leaderboard: React.FC = () => {
                               <TrendingUp size={14} /> Invest
                           </button>
                       </div>
-
                   </div>
               ))}
           </div>

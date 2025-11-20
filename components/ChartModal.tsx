@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { X, TrendingUp, TrendingDown, Activity, Zap, Wallet, ArrowDownUp, Loader2, CheckCircle } from 'lucide-react';
 import { VideoAsset } from '../types';
@@ -19,7 +20,6 @@ export const ChartModal: React.FC<ChartModalProps> = ({ asset, onClose, initialM
   const tokenBalance = 15000;
 
   // Calculate estimated output
-  // Assuming price is in USD for display, but treating it as relative ratio for mock calculation
   const numericAmount = parseFloat(amount) || 0;
   const estimatedOutput = mode === 'buy' 
     ? (numericAmount / asset.price).toFixed(2) 
@@ -28,7 +28,6 @@ export const ChartModal: React.FC<ChartModalProps> = ({ asset, onClose, initialM
   const handleExecute = async () => {
     if (!amount) return;
     setIsSubmitting(true);
-    // Simulate Solana transaction
     await new Promise(resolve => setTimeout(resolve, 1500));
     setIsSubmitting(false);
     setTxSuccess(true);
@@ -45,7 +44,6 @@ export const ChartModal: React.FC<ChartModalProps> = ({ asset, onClose, initialM
     }
   };
 
-  // Mock data generation for the chart
   const generateChartPath = () => {
     const points = [];
     let y = 50;
@@ -76,12 +74,23 @@ export const ChartModal: React.FC<ChartModalProps> = ({ asset, onClose, initialM
       );
   }
 
+  // Responsive Layout:
+  // Mobile: Bottom Sheet (items-end, slide-in-from-bottom)
+  // Desktop: Center Modal (items-center, fade-in)
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden relative flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex md:items-center items-end justify-center md:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+      {/* Close Click Area */}
+      <div className="absolute inset-0" onClick={onClose}></div>
+      
+      <div className="w-full md:max-w-lg bg-slate-900 border-t md:border border-slate-700 rounded-t-3xl md:rounded-3xl shadow-2xl overflow-hidden relative flex flex-col max-h-[95vh] md:max-h-[90vh] animate-in slide-in-from-bottom-10 md:zoom-in-95 duration-300 z-10">
         
+        {/* Mobile Pull Handle */}
+        <div className="md:hidden w-full flex justify-center pt-3 pb-1 bg-slate-900" onClick={onClose}>
+            <div className="w-12 h-1.5 bg-slate-700 rounded-full"></div>
+        </div>
+
         {/* Header */}
-        <div className="p-6 border-b border-slate-800 flex justify-between items-start flex-shrink-0">
+        <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-start flex-shrink-0 bg-slate-900">
           <div>
             <div className="flex items-center gap-2">
                 <h2 className="text-2xl font-bold text-white tracking-tight">{asset.ticker}</h2>
@@ -93,20 +102,18 @@ export const ChartModal: React.FC<ChartModalProps> = ({ asset, onClose, initialM
                 ${asset.price.toFixed(6)}
             </div>
           </div>
-          <button onClick={onClose} className="p-2 bg-slate-800 rounded-full text-slate-400 hover:text-white hover:bg-slate-700 transition-colors">
+          <button onClick={onClose} className="p-2 bg-slate-800 rounded-full text-slate-400 hover:text-white hover:bg-slate-700 transition-colors hidden md:block">
             <X size={20} />
           </button>
         </div>
 
         {/* Chart Area (Compressed height for mobile) */}
-        <div className="relative h-48 bg-slate-950 w-full overflow-hidden group flex-shrink-0">
-            {/* Grid Lines */}
+        <div className="relative h-40 md:h-48 bg-slate-950 w-full overflow-hidden group flex-shrink-0">
             <div className="absolute inset-0 grid grid-cols-6 grid-rows-4">
                 {[...Array(24)].map((_, i) => (
                     <div key={i} className="border-r border-b border-slate-800/30"></div>
                 ))}
             </div>
-
             <svg className="absolute inset-0 w-full h-full preserve-3d" viewBox="0 0 400 100" preserveAspectRatio="none">
                 <defs>
                     <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
@@ -127,15 +134,6 @@ export const ChartModal: React.FC<ChartModalProps> = ({ asset, onClose, initialM
                     className="drop-shadow-[0_0_10px_rgba(74,222,128,0.5)]"
                 />
             </svg>
-
-            {/* Live Pulse */}
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                <span className={`relative flex h-2 w-2`}>
-                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isGreen ? 'bg-green-400' : 'bg-red-400'}`}></span>
-                  <span className={`relative inline-flex rounded-full h-2 w-2 ${isGreen ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                </span>
-                <span className="text-[10px] text-slate-400 font-mono">LIVE</span>
-            </div>
         </div>
 
         {/* TRADING INTERFACE */}
@@ -144,26 +142,26 @@ export const ChartModal: React.FC<ChartModalProps> = ({ asset, onClose, initialM
             <div className="flex border-b border-slate-800">
                 <button 
                     onClick={() => setMode('buy')}
-                    className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider transition-colors relative ${mode === 'buy' ? 'text-green-400 bg-green-900/10' : 'text-slate-500 hover:text-slate-300'}`}
+                    className={`flex-1 py-3 md:py-4 text-sm font-bold uppercase tracking-wider transition-colors relative ${mode === 'buy' ? 'text-green-400 bg-green-900/10' : 'text-slate-500 hover:text-slate-300'}`}
                 >
                     Buy
                     {mode === 'buy' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.8)]"></div>}
                 </button>
                 <button 
                     onClick={() => setMode('sell')}
-                    className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider transition-colors relative ${mode === 'sell' ? 'text-red-400 bg-red-900/10' : 'text-slate-500 hover:text-slate-300'}`}
+                    className={`flex-1 py-3 md:py-4 text-sm font-bold uppercase tracking-wider transition-colors relative ${mode === 'sell' ? 'text-red-400 bg-red-900/10' : 'text-slate-500 hover:text-slate-300'}`}
                 >
                     Sell
                     {mode === 'sell' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.8)]"></div>}
                 </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="p-4 md:p-6 space-y-4 md:space-y-6 overflow-y-auto pb-safe-area-bottom">
                 
                 {/* Input Group */}
-                <div className="space-y-4">
+                <div className="space-y-2 md:space-y-4">
                     <div className="flex justify-between text-xs text-slate-400 px-1">
-                        <span>Amount to {mode}</span>
+                        <span>Amount</span>
                         <span className="flex items-center gap-1 cursor-pointer hover:text-white" onClick={() => setPercentage(1)}>
                             <Wallet size={12} /> 
                             Balance: {mode === 'buy' ? `${solBalance} SOL` : `${tokenBalance.toLocaleString()} ${asset.ticker}`}
@@ -176,14 +174,13 @@ export const ChartModal: React.FC<ChartModalProps> = ({ asset, onClose, initialM
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             placeholder="0.00"
-                            className={`w-full bg-slate-950 border-2 rounded-2xl py-4 pl-4 pr-20 text-2xl font-mono text-white outline-none focus:shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-all ${mode === 'buy' ? 'focus:border-green-500/50 border-slate-800' : 'focus:border-red-500/50 border-slate-800'}`}
+                            className={`w-full bg-slate-950 border-2 rounded-2xl py-3 md:py-4 pl-4 pr-20 text-xl md:text-2xl font-mono text-white outline-none focus:shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-all ${mode === 'buy' ? 'focus:border-green-500/50 border-slate-800' : 'focus:border-red-500/50 border-slate-800'}`}
                         />
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-slate-500 pointer-events-none">
                             {mode === 'buy' ? 'SOL' : asset.ticker}
                         </div>
                     </div>
 
-                    {/* Quick Percentages */}
                     <div className="flex gap-2">
                         {[0.25, 0.5, 1].map((pct) => (
                             <button 
@@ -197,21 +194,13 @@ export const ChartModal: React.FC<ChartModalProps> = ({ asset, onClose, initialM
                     </div>
                 </div>
 
-                {/* Swap Preview Arrow */}
-                <div className="flex justify-center">
-                    <div className="bg-slate-800 p-2 rounded-full text-slate-400">
-                        <ArrowDownUp size={16} />
-                    </div>
-                </div>
-
                 {/* Output Estimate */}
-                <div className="flex justify-between items-center bg-slate-950/50 p-4 rounded-xl border border-slate-800">
-                    <span className="text-slate-400 text-sm">You receive (est)</span>
+                <div className="flex justify-between items-center bg-slate-950/50 p-3 md:p-4 rounded-xl border border-slate-800">
+                    <span className="text-slate-400 text-xs md:text-sm">You receive (est)</span>
                     <div className="text-right">
-                        <div className="text-xl font-bold text-white">
-                            {estimatedOutput} <span className="text-sm text-slate-500">{mode === 'buy' ? asset.ticker : 'SOL'}</span>
+                        <div className="text-lg md:text-xl font-bold text-white">
+                            {estimatedOutput} <span className="text-xs md:text-sm text-slate-500">{mode === 'buy' ? asset.ticker : 'SOL'}</span>
                         </div>
-                        <div className="text-xs text-slate-500">Slippage &lt; 1%</div>
                     </div>
                 </div>
 
@@ -220,7 +209,7 @@ export const ChartModal: React.FC<ChartModalProps> = ({ asset, onClose, initialM
                     onClick={handleExecute}
                     disabled={isSubmitting || !amount || parseFloat(amount) <= 0}
                     className={`
-                        w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg
+                        w-full py-3 md:py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg
                         disabled:opacity-50 disabled:cursor-not-allowed
                         ${mode === 'buy' 
                             ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:shadow-[0_0_30px_rgba(34,197,94,0.4)] text-white' 
@@ -233,12 +222,8 @@ export const ChartModal: React.FC<ChartModalProps> = ({ asset, onClose, initialM
                     ) : (
                         mode === 'buy' ? <TrendingUp size={20} /> : <TrendingDown size={20} />
                     )}
-                    {isSubmitting ? 'Confirming on Solana...' : `${mode.toUpperCase()} ${asset.ticker}`}
+                    {isSubmitting ? 'Confirming...' : `${mode.toUpperCase()} NOW`}
                 </button>
-                
-                <div className="text-center text-[10px] text-slate-500">
-                    Powered by Jupiter Aggregator • Network Fee: 0.00005 SOL
-                </div>
             </div>
         </div>
 

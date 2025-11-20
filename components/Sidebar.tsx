@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Video, ShieldCheck, Activity, Settings, PieChart, Trophy } from 'lucide-react';
+import { Home, Video, ShieldCheck, Activity, Settings, PieChart, Trophy, Plus } from 'lucide-react';
 
 interface SidebarProps {
   mobile?: boolean;
@@ -11,28 +12,71 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobile }) => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const navItems = [
+  // Mobile Navigation Configuration
+  // We only show specific items in the bottom dock
+  const mobileNavItems = [
+    { path: '/', icon: Home, label: 'Feed' },
+    { path: '/leaderboard', icon: Trophy, label: 'Top' },
+    { path: '/create', icon: Plus, label: 'Mint', highlight: true }, // Special Central Button
+    { path: '/security', icon: ShieldCheck, label: 'Scan' },
+    { path: '/settings', icon: Settings, label: 'Settings' },
+  ];
+
+  const desktopNavItems = [
     { path: '/', icon: Home, label: 'Market Feed' },
     { path: '/create', icon: Video, label: 'Mint Video' },
-    { path: '/leaderboard', icon: Trophy, label: 'Elite 100' }, // New Item
+    { path: '/leaderboard', icon: Trophy, label: 'Elite 100' },
     { path: '/portfolio', icon: PieChart, label: 'Portfolio' },
     { path: '/security', icon: ShieldCheck, label: 'Rug Scanner' },
     { path: '/settings', icon: Settings, label: 'Settings' },
   ];
 
-  const containerClasses = mobile
-    ? "flex justify-around w-full"
-    : "flex flex-col p-6 gap-8 h-full";
+  // RENDER MOBILE BOTTOM DOCK
+  if (mobile) {
+    return (
+        <>
+        {/* Gradient Fade at bottom for smooth scrolling content disappearance */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black to-transparent pointer-events-none" />
+        
+        <nav className="bg-slate-950/90 backdrop-blur-lg border-t border-slate-800 pb-safe-area-bottom px-2">
+            <div className="flex justify-around items-center h-16 relative">
+                {mobileNavItems.map((item) => {
+                    const active = isActive(item.path);
+                    
+                    // Special styling for the Central "Mint" Button
+                    if (item.highlight) {
+                        return (
+                            <Link key={item.path} to={item.path} className="relative -top-5 group">
+                                <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all duration-300 ${active ? 'bg-amber-400 scale-110' : 'bg-gradient-to-br from-amber-500 to-yellow-600 text-white hover:scale-105'}`}>
+                                    <item.icon size={28} className={active ? 'text-black' : 'text-black'} strokeWidth={2.5} />
+                                </div>
+                            </Link>
+                        );
+                    }
 
-  const linkBaseClasses = mobile
-    ? "flex flex-col items-center gap-1 p-2 text-xs"
-    : "flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-medium";
+                    return (
+                        <Link 
+                            key={item.path} 
+                            to={item.path}
+                            className={`flex flex-col items-center justify-center w-14 h-full space-y-1 transition-colors ${active ? 'text-amber-400' : 'text-slate-500 hover:text-slate-300'}`}
+                        >
+                            <item.icon size={24} strokeWidth={active ? 2.5 : 2} />
+                            {/* Optional: tiny dot for active state instead of text */}
+                            {active && <div className="w-1 h-1 bg-amber-400 rounded-full absolute bottom-2" />}
+                        </Link>
+                    );
+                })}
+            </div>
+        </nav>
+        </>
+    );
+  }
 
+  // RENDER DESKTOP SIDEBAR
   return (
-    <nav className={containerClasses}>
-      {!mobile && (
-        <div className="mb-8 px-4 flex items-center gap-3">
-          {/* Kinetic Shard Logo - Small Version */}
+    <nav className="flex flex-col p-6 gap-8 h-full">
+      <div className="mb-8 px-4 flex items-center gap-3">
+          {/* Kinetic Shard Logo - Desktop */}
           <div className="relative w-10 h-10 flex-shrink-0">
              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg">
                 <defs>
@@ -43,8 +87,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobile }) => {
                 </defs>
                 <path d="M50 0 L95 25 V75 L50 100 L5 75 V25 Z" fill="none" stroke="url(#goldGradSmall)" strokeWidth="4" />
                 <path d="M35 25 L35 75" stroke="url(#goldGradSmall)" strokeWidth="6" strokeLinecap="round" />
-                <path d="M35 50 L70 25" stroke="url(#goldGradSmall)" strokeWidth="6" strokeLinecap="round" />
-                <path d="M35 50 L70 75" stroke="url(#goldGradSmall)" strokeWidth="6" strokeLinecap="round" />
+                <path d="M35 50 L70 20" stroke="url(#goldGradSmall)" strokeWidth="6" strokeLinecap="round" />
+                <path d="M35 50 L70 80" stroke="url(#goldGradSmall)" strokeWidth="6" strokeLinecap="round" />
              </svg>
           </div>
           <div>
@@ -53,32 +97,30 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobile }) => {
             </h1>
             <p className="text-amber-500/60 text-[10px] uppercase tracking-[0.2em]">Elite Protocol</p>
           </div>
-        </div>
-      )}
+      </div>
 
-      <div className={mobile ? "flex w-full justify-between" : "flex flex-col gap-2"}>
-        {navItems.map((item) => {
+      <div className="flex flex-col gap-2">
+        {desktopNavItems.map((item) => {
           const active = isActive(item.path);
           return (
             <Link
               key={item.path}
               to={item.path}
               className={`
-                ${linkBaseClasses}
+                flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-medium
                 ${active 
                   ? 'bg-amber-900/20 text-amber-400 border border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]' 
                   : 'text-slate-500 hover:text-slate-200 hover:bg-slate-900'}
               `}
             >
-              <item.icon size={mobile ? 20 : 22} className={active ? "text-amber-400" : ""} />
+              <item.icon size={22} className={active ? "text-amber-400" : ""} />
               <span>{item.label}</span>
             </Link>
           );
         })}
       </div>
 
-      {!mobile && (
-        <div className="mt-auto">
+      <div className="mt-auto">
            {/* Sidebar Widget - Top Movers */}
            <div className="mb-4">
               <h4 className="text-xs font-bold text-slate-500 uppercase mb-3 px-2">Top Gainers (24h)</h4>
@@ -106,7 +148,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobile }) => {
               </div>
            </div>
         </div>
-      )}
     </nav>
   );
 };
