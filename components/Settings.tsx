@@ -1,13 +1,23 @@
-import React, { useContext } from 'react';
+
+import React, { useContext, useState } from 'react';
 import { UserContext, WalletContext } from '../types';
-import { Shield, User, Bell, LogOut, Eye, Fingerprint } from 'lucide-react';
+import { Shield, User, Bell, LogOut, Eye, Fingerprint, Users, Copy, Check } from 'lucide-react';
 
 export const Settings: React.FC = () => {
   const { username, handle, avatar, isBiometricVerified } = useContext(UserContext);
   const { disconnect, address } = useContext(WalletContext);
+  const [copied, setCopied] = useState(false);
+
+  const referralCode = "KINECTIC-AWAKEN-88";
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(referralCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
-    <div className="max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24">
       <h2 className="text-3xl font-bold text-white mb-8">Settings</h2>
 
       <div className="space-y-6">
@@ -25,6 +35,27 @@ export const Settings: React.FC = () => {
              <button className="ml-auto text-sm bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg transition-colors">
                Edit
              </button>
+           </div>
+        </div>
+
+        {/* GROWTH / REFERRALS - NEW AGGRESSIVE FEATURE */}
+        <div className="bg-gradient-to-br from-amber-900/20 to-slate-900 border border-amber-500/30 rounded-2xl p-6 shadow-[0_0_20px_rgba(245,158,11,0.1)] relative overflow-hidden">
+           <div className="absolute top-0 right-0 p-24 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+           
+           <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+             <Users size={20} className="text-amber-400" /> Expand the Network
+           </h3>
+           <p className="text-sm text-slate-400 mb-4">Bring the awakening to others. Earn 5% of trading fees from every user you unplug.</p>
+           
+           <div className="flex items-center gap-2 bg-black/50 border border-amber-500/20 p-3 rounded-xl">
+              <div className="font-mono font-bold text-amber-100 tracking-wider flex-1">{referralCode}</div>
+              <button 
+                onClick={handleCopy}
+                className="text-xs font-bold flex items-center gap-1 bg-amber-500 text-black px-3 py-1.5 rounded-lg hover:bg-amber-400 transition-colors"
+              >
+                  {copied ? <Check size={14} /> : <Copy size={14} />}
+                  {copied ? 'COPIED' : 'COPY CODE'}
+              </button>
            </div>
         </div>
 

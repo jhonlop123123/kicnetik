@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, TrendingUp, TrendingDown, Activity, Zap, Wallet, ArrowDownUp, Loader2, CheckCircle } from 'lucide-react';
+import { X, TrendingUp, TrendingDown, Activity, Zap, Wallet, ArrowDownUp, Loader2, CheckCircle, Lock } from 'lucide-react';
 import { VideoAsset } from '../types';
 
 interface ChartModalProps {
@@ -12,8 +12,7 @@ interface ChartModalProps {
 export const ChartModal: React.FC<ChartModalProps> = ({ asset, onClose, initialMode = 'buy' }) => {
   const [mode, setMode] = useState<'buy' | 'sell'>(initialMode);
   const [amount, setAmount] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [txSuccess, setTxSuccess] = useState(false);
+  const [step, setStep] = useState<'input' | 'signing' | 'success'>('input');
 
   // Mock wallet balance
   const solBalance = 14.5;
@@ -27,10 +26,16 @@ export const ChartModal: React.FC<ChartModalProps> = ({ asset, onClose, initialM
 
   const handleExecute = async () => {
     if (!amount) return;
-    setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setTxSuccess(true);
+    
+    // Step 1: Request Signature (Psychological Friction)
+    setStep('signing');
+    
+    // Simulate wallet interaction time
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Step 2: Success
+    setStep('success');
+    
     setTimeout(() => {
         onClose();
     }, 2000);
@@ -59,24 +64,44 @@ export const ChartModal: React.FC<ChartModalProps> = ({ asset, onClose, initialM
   const isGreen = asset.priceChange24h >= 0;
   const strokeColor = isGreen ? "#4ade80" : "#f87171";
 
-  if (txSuccess) {
+  // --- SUCCESS STATE ---
+  if (step === 'success') {
       return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-200">
             <div className="bg-slate-900 border border-green-500/30 rounded-3xl p-12 flex flex-col items-center text-center shadow-[0_0_50px_rgba(74,222,128,0.2)]">
                 <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-6 animate-bounce">
                     <CheckCircle size={40} className="text-green-400" />
                 </div>
-                <h2 className="text-2xl font-bold text-white mb-2">Transaction Successful</h2>
+                <h2 className="text-2xl font-bold text-white mb-2">Transaction Confirmed</h2>
                 <p className="text-slate-400 mb-6">Successfully {mode === 'buy' ? 'bought' : 'sold'} {asset.ticker}</p>
-                <div className="text-xs font-mono text-slate-500">Signature: 5xG...9jK</div>
+                <div className="text-xs font-mono text-slate-500 bg-slate-950 px-4 py-2 rounded-lg">Signature: 5xG...9jK</div>
             </div>
         </div>
       );
   }
 
-  // Responsive Layout:
-  // Mobile: Bottom Sheet (items-end, slide-in-from-bottom)
-  // Desktop: Center Modal (items-center, fade-in)
+  // --- SIGNING SIMULATION STATE ---
+  if (step === 'signing') {
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="bg-slate-900 border border-slate-700 rounded-3xl p-10 flex flex-col items-center text-center max-w-sm w-full">
+                <div className="relative w-16 h-16 mb-6">
+                    <div className="absolute inset-0 border-4 border-slate-700 rounded-full"></div>
+                    <div className="absolute inset-0 border-4 border-t-amber-500 rounded-full animate-spin"></div>
+                    <Lock size={24} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white" />
+                </div>
+                <h2 className="text-xl font-bold text-white mb-2">Requesting Signature</h2>
+                <p className="text-slate-400 text-sm mb-6">Please approve the transaction in your wallet.</p>
+                <div className="w-full bg-slate-950 p-3 rounded-xl border border-slate-800 text-left">
+                    <div className="text-xs text-slate-500 uppercase font-bold mb-1">Action</div>
+                    <div className="text-sm text-white font-mono">{mode.toUpperCase()} {asset.ticker}</div>
+                </div>
+            </div>
+        </div>
+      );
+  }
+
+  // --- MAIN CHART/TRADE UI ---
   return (
     <div className="fixed inset-0 z-50 flex md:items-center items-end justify-center md:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
       {/* Close Click Area */}
@@ -207,7 +232,7 @@ export const ChartModal: React.FC<ChartModalProps> = ({ asset, onClose, initialM
                 {/* Main Action Button */}
                 <button 
                     onClick={handleExecute}
-                    disabled={isSubmitting || !amount || parseFloat(amount) <= 0}
+                    disabled={!amount || parseFloat(amount) <= 0}
                     className={`
                         w-full py-3 md:py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg
                         disabled:opacity-50 disabled:cursor-not-allowed
@@ -217,12 +242,8 @@ export const ChartModal: React.FC<ChartModalProps> = ({ asset, onClose, initialM
                         }
                     `}
                 >
-                    {isSubmitting ? (
-                        <Loader2 className="animate-spin" />
-                    ) : (
-                        mode === 'buy' ? <TrendingUp size={20} /> : <TrendingDown size={20} />
-                    )}
-                    {isSubmitting ? 'Confirming...' : `${mode.toUpperCase()} NOW`}
+                    {mode === 'buy' ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
+                    {mode.toUpperCase()} NOW
                 </button>
             </div>
         </div>
