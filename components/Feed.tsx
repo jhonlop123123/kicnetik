@@ -1,9 +1,10 @@
-import React, { useState, useRef } from 'react';
-import { Heart, MessageCircle, Share2, ShieldCheck, Play, TrendingUp, DollarSign, BarChart3, Flame, Clock, AlertOctagon, Video, Image as ImageIcon, Upload, Coins, X } from 'lucide-react';
+import React, { useState, useRef, useContext } from 'react';
+import { Heart, MessageCircle, Share2, ShieldCheck, Play, TrendingUp, DollarSign, BarChart3, Flame, Clock, AlertOctagon, Video, Image as ImageIcon, Upload, Coins, X, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Post, VideoAsset } from '../types';
 import { ChartModal } from './ChartModal';
 import { CommentsModal } from './CommentsModal';
+import { ToastContext } from '../types';
 
 const MOCK_POSTS: Post[] = [
   {
@@ -85,6 +86,7 @@ const getSurvivalStatus = (post: Post) => {
 export const Feed: React.FC = () => {
   const [selectedAsset, setSelectedAsset] = useState<{asset: VideoAsset, mode: 'buy' | 'sell'} | null>(null);
   const [commentPost, setCommentPost] = useState<Post | null>(null);
+  const { addToast } = useContext(ToastContext);
   
   // Upload / Launch State
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -97,6 +99,16 @@ export const Feed: React.FC = () => {
     if (file) {
         setSelectedFile(file.name);
     }
+  };
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    addToast('Liked', 'You liked this post', 'success');
+  };
+
+  const handleShare = (e: React.MouseEvent, ticker: string) => {
+    e.stopPropagation();
+    addToast('Network Expanded', `Linked ${ticker} to your node network.`, 'gold');
   };
 
   return (
@@ -310,7 +322,7 @@ export const Feed: React.FC = () => {
 
               {/* Social Actions */}
               <div className="flex items-center gap-6 text-slate-500 p-4 bg-slate-950/60">
-                <button className="flex items-center gap-2 hover:text-pink-500 transition-colors group/heart">
+                <button onClick={handleLike} className="flex items-center gap-2 hover:text-pink-500 transition-colors group/heart">
                   <Heart size={18} className="group-hover/heart:scale-110 transition-transform" />
                   <span className="text-sm">{post.likes}</span>
                 </button>
@@ -321,6 +333,15 @@ export const Feed: React.FC = () => {
                 >
                   <MessageCircle size={18} />
                   <span className="text-sm">{post.commentsCount || 0} Discuss</span>
+                </button>
+                
+                {/* NETWORK / SHARE BUTTON */}
+                <button 
+                  onClick={(e) => handleShare(e, post.assetData?.ticker || 'VIDEO')}
+                  className={`flex items-center gap-2 transition-all group ${isViral ? 'text-cyan-400 animate-pulse hover:text-cyan-300' : 'hover:text-white'}`}
+                >
+                   <Globe size={18} className={isViral ? 'drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]' : ''} />
+                   <span className="text-sm hidden sm:inline">Network</span>
                 </button>
 
                 <button 

@@ -1,6 +1,6 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { UserContext } from '../types';
-import { Wallet, TrendingUp, TrendingDown, PieChart, ArrowUpRight } from 'lucide-react';
+import { Wallet, TrendingUp, TrendingDown, PieChart, ArrowUpRight, Edit2, X, Save } from 'lucide-react';
 import { Holding } from '../types';
 
 // Mock Data
@@ -11,23 +11,87 @@ const MOCK_HOLDINGS: Holding[] = [
 ];
 
 export const Portfolio: React.FC = () => {
-  const { username, handle, avatar } = useContext(UserContext);
+  const { username, handle, avatar, updateProfile } = useContext(UserContext);
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(username);
+  const [editHandle, setEditHandle] = useState(handle);
+  const [editAvatar, setEditAvatar] = useState(avatar);
 
   const totalValue = MOCK_HOLDINGS.reduce((acc, h) => acc + (h.amount * h.currentPrice), 0);
   const totalCost = MOCK_HOLDINGS.reduce((acc, h) => acc + (h.amount * h.avgEntry), 0);
   const totalPnL = totalValue - totalCost;
   const totalPnLPercent = (totalPnL / totalCost) * 100;
 
+  const handleSaveProfile = () => {
+    updateProfile({
+        name: editName,
+        handle: editHandle.startsWith('@') ? editHandle : `@${editHandle}`,
+        avatar: editAvatar
+    });
+    setIsEditing(false);
+  };
+
   return (
     <div className="max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24">
+      
+      {/* Edit Profile Modal */}
+      {isEditing && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+              <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl">
+                  <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-xl font-bold text-white">Edit Identity</h3>
+                      <button onClick={() => setIsEditing(false)} className="text-slate-400 hover:text-white"><X size={24}/></button>
+                  </div>
+                  <div className="space-y-4">
+                      <div>
+                          <label className="text-xs text-slate-400 uppercase font-bold block mb-1">Display Name</label>
+                          <input 
+                            value={editName} 
+                            onChange={(e) => setEditName(e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white outline-none focus:border-amber-500"
+                          />
+                      </div>
+                      <div>
+                          <label className="text-xs text-slate-400 uppercase font-bold block mb-1">Handle</label>
+                          <input 
+                            value={editHandle} 
+                            onChange={(e) => setEditHandle(e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white outline-none focus:border-amber-500"
+                          />
+                      </div>
+                      <div>
+                          <label className="text-xs text-slate-400 uppercase font-bold block mb-1">Avatar URL</label>
+                          <input 
+                            value={editAvatar} 
+                            onChange={(e) => setEditAvatar(e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-300 text-sm outline-none focus:border-amber-500"
+                          />
+                      </div>
+                      <button 
+                        onClick={handleSaveProfile}
+                        className="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-3 rounded-xl mt-4 flex items-center justify-center gap-2"
+                      >
+                          <Save size={18} /> Save Changes
+                      </button>
+                  </div>
+              </div>
+          </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
          <div>
             <h2 className="text-3xl font-bold text-white">My Portfolio</h2>
             <p className="text-slate-400 text-sm">Track your viral bets</p>
          </div>
-         <div className="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 p-1">
-            <img src={avatar} alt="Profile" className="w-full h-full rounded-full object-cover" />
+         <div className="relative group cursor-pointer" onClick={() => setIsEditing(true)}>
+            <div className="w-16 h-16 rounded-full bg-slate-800 border-2 border-amber-500/30 p-0.5">
+                <img src={avatar} alt="Profile" className="w-full h-full rounded-full object-cover" />
+            </div>
+            <div className="absolute bottom-0 right-0 bg-slate-800 p-1.5 rounded-full border border-slate-600 text-slate-300 group-hover:text-white group-hover:bg-amber-600 transition-colors">
+                <Edit2 size={12} />
+            </div>
          </div>
       </div>
 

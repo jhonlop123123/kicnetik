@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Video, ShieldCheck, Activity, Settings, PieChart, Hexagon } from 'lucide-react';
+import { Home, Video, ShieldCheck, Activity, Settings, PieChart, Trophy } from 'lucide-react';
 
 interface SidebarProps {
   mobile?: boolean;
@@ -14,6 +14,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobile }) => {
   const navItems = [
     { path: '/', icon: Home, label: 'Market Feed' },
     { path: '/create', icon: Video, label: 'Mint Video' },
+    { path: '/leaderboard', icon: Trophy, label: 'Elite 100' }, // New Item
     { path: '/portfolio', icon: PieChart, label: 'Portfolio' },
     { path: '/security', icon: ShieldCheck, label: 'Rug Scanner' },
     { path: '/settings', icon: Settings, label: 'Settings' },
@@ -31,7 +32,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobile }) => {
     <nav className={containerClasses}>
       {!mobile && (
         <div className="mb-8 px-4 flex items-center gap-3">
-          {/* New Kinetic Shard Logo - Small Version */}
+          {/* Kinetic Shard Logo - Small Version */}
           <div className="relative w-10 h-10 flex-shrink-0">
              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg">
                 <defs>
@@ -78,6 +79,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobile }) => {
 
       {!mobile && (
         <div className="mt-auto">
+           {/* Sidebar Widget - Top Movers */}
+           <div className="mb-4">
+              <h4 className="text-xs font-bold text-slate-500 uppercase mb-3 px-2">Top Gainers (24h)</h4>
+              <div className="space-y-2">
+                 {['$NEON', '$ICE', '$VEO'].map((ticker, i) => (
+                    <div key={ticker} className="flex items-center justify-between px-3 py-2 bg-slate-900/50 rounded-lg border border-slate-800 hover:border-green-500/30 transition-colors cursor-pointer">
+                       <span className="font-mono text-xs text-slate-300">{ticker}</span>
+                       <span className="font-mono text-xs text-green-400">+{120 - (i*30)}%</span>
+                    </div>
+                 ))}
+              </div>
+           </div>
+
            <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800 relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <div className="flex items-center gap-2 mb-2 relative z-10">

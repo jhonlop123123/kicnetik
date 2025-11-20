@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Wallet, Fingerprint, ScanFace, ArrowRight, ShieldCheck, Zap, TrendingUp, Diamond, Hexagon } from 'lucide-react';
+import { Wallet, Fingerprint, ScanFace, ArrowRight, Diamond, Zap, Lock, Eye, Grid3X3 } from 'lucide-react';
 import { WalletContext } from '../types';
 
 interface LandingPageProps {
@@ -12,17 +12,47 @@ export const LandingPage: React.FC<LandingPageProps> = ({ currentStep, onBiometr
   const { connect } = useContext(WalletContext);
   const [name, setName] = useState('');
   const [handle, setHandle] = useState('');
-  const [scanning, setScanning] = useState(false);
+  
+  // Quantum Bio-Shield States
+  // 0: Inactive, 1: Fingerprint, 2: Retina, 3: Pattern, 4: Complete
+  const [verificationStage, setVerificationStage] = useState(0);
+  const [patternInput, setPatternInput] = useState<number[]>([]);
 
-  // Handle Biometric Auto-Start
+  // Auto-advance logic for biometrics
   useEffect(() => {
-    if (currentStep === 'biometrics' && !scanning) {
-      setScanning(true);
+    if (currentStep === 'biometrics' && verificationStage === 0) {
+      setVerificationStage(1);
+      
+      // Stage 1: Fingerprint (2s)
       setTimeout(() => {
-        onBiometricSuccess();
+        setVerificationStage(2);
+        
+        // Stage 2: Retina (2s)
+        setTimeout(() => {
+            setVerificationStage(3);
+            // Stops at 3, waits for user Pattern input
+        }, 2500);
+
       }, 2500);
     }
-  }, [currentStep, onBiometricSuccess, scanning]);
+  }, [currentStep, verificationStage]);
+
+  const handlePatternClick = (nodeId: number) => {
+    if (verificationStage !== 3) return;
+    
+    const newPattern = [...patternInput, nodeId];
+    setPatternInput(newPattern);
+
+    // Mock validation: assume any 4-node pattern is correct for this demo
+    if (newPattern.length >= 4) {
+        setTimeout(() => {
+            setVerificationStage(4);
+            setTimeout(() => {
+                onBiometricSuccess();
+            }, 1000);
+        }, 500);
+    }
+  };
 
   const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +78,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ currentStep, onBiometr
         <div className="mb-12 flex flex-col items-center animate-in fade-in slide-in-from-top-8 duration-1000">
           <div className="relative w-28 h-28 mb-6 group">
              <div className="absolute inset-0 bg-amber-500/20 blur-3xl rounded-full group-hover:bg-amber-400/30 transition-all duration-700"></div>
-             
              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-2xl relative z-10">
                 <defs>
                    <linearGradient id="goldGradLP" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -57,16 +86,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ currentStep, onBiometr
                       <stop offset="100%" stopColor="#78350F" />
                    </linearGradient>
                 </defs>
-                {/* Kinetic Shard Geometry */}
-                {/* Hexagon Frame */}
                 <path d="M50 2 L98 27 V73 L50 98 L2 73 V27 Z" fill="none" stroke="url(#goldGradLP)" strokeWidth="1.5" className="opacity-40" />
-                
-                {/* The K-Shard */}
                 <path d="M35 25 L35 75" stroke="url(#goldGradLP)" strokeWidth="8" strokeLinecap="round" className="drop-shadow-lg" />
                 <path d="M35 50 L70 20" stroke="url(#goldGradLP)" strokeWidth="8" strokeLinecap="round" className="drop-shadow-lg" />
                 <path d="M35 50 L70 80" stroke="url(#goldGradLP)" strokeWidth="8" strokeLinecap="round" className="drop-shadow-lg" />
-                
-                {/* Center Spark */}
                 <circle cx="35" cy="50" r="4" fill="#FFF" className="animate-pulse" />
              </svg>
           </div>
@@ -79,7 +102,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ currentStep, onBiometr
         </div>
 
         {/* CONTAINER CARD */}
-        <div className="w-full backdrop-blur-xl bg-slate-950/40 border border-amber-500/20 rounded-3xl shadow-[0_0_40px_rgba(245,158,11,0.05)] overflow-hidden relative">
+        <div className="w-full backdrop-blur-xl bg-slate-950/40 border border-amber-500/20 rounded-3xl shadow-[0_0_40px_rgba(245,158,11,0.05)] overflow-hidden relative min-h-[450px] flex flex-col justify-center">
            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-400/50 to-transparent"></div>
 
           {/* STEP 1: LANDING / CONNECT */}
@@ -119,29 +142,69 @@ export const LandingPage: React.FC<LandingPageProps> = ({ currentStep, onBiometr
               <div className="flex justify-center gap-6 text-[10px] text-slate-600 uppercase tracking-widest">
                  <span>Powered by Solana</span>
                  <span>•</span>
-                 <span>Gemini AI Secured</span>
+                 <span>Quantum Secure</span>
               </div>
             </div>
           )}
 
-          {/* STEP 2: BIOMETRICS */}
+          {/* STEP 2: QUANTUM TRINITY (3-STEP BIOMETRICS) */}
           {currentStep === 'biometrics' && (
-            <div className="p-10 flex flex-col items-center justify-center min-h-[400px] animate-in fade-in duration-500">
-              <div className="relative w-40 h-40 mb-8 flex items-center justify-center">
+            <div className="p-10 flex flex-col items-center justify-center animate-in fade-in duration-500">
+              
+              <div className="relative w-48 h-48 mb-8 flex items-center justify-center">
+                
+                {/* Base Ring */}
                 <div className="absolute inset-0 border border-amber-900/50 rounded-full"></div>
-                <div className="absolute inset-2 border border-amber-800/50 rounded-full"></div>
-                <div className={`absolute inset-0 border-2 border-amber-400/60 rounded-full border-t-transparent ${scanning ? 'animate-spin' : ''}`} style={{ animationDuration: '2s' }}></div>
-                <div className={`absolute inset-4 border-2 border-amber-200/40 rounded-full border-b-transparent ${scanning ? 'animate-spin' : ''}`} style={{ animationDirection: 'reverse', animationDuration: '3s' }}></div>
-                <div className="relative z-10 p-4 bg-black/50 rounded-full backdrop-blur-sm border border-amber-500/20">
-                   <Fingerprint size={48} className="text-amber-400 animate-pulse" />
+                
+                {/* Rotating Scanners */}
+                <div className={`absolute inset-0 border-2 border-amber-400/60 rounded-full border-t-transparent animate-spin`} style={{ animationDuration: '2s' }}></div>
+                <div className={`absolute inset-4 border-2 border-amber-200/40 rounded-full border-b-transparent animate-spin`} style={{ animationDirection: 'reverse', animationDuration: '3s' }}></div>
+                
+                {/* ICON DISPLAY AREA */}
+                <div className="relative z-10 p-6 bg-black/80 rounded-full backdrop-blur-sm border border-amber-500/20 w-32 h-32 flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.2)]">
+                   {verificationStage === 1 && (
+                       <Fingerprint size={48} className="text-amber-400 animate-pulse" />
+                   )}
+                   {verificationStage === 2 && (
+                       <Eye size={48} className="text-cyan-400 animate-pulse" />
+                   )}
+                   {verificationStage >= 3 && (
+                       <Lock size={48} className="text-purple-400" />
+                   )}
                 </div>
-                <div className="absolute w-full h-[2px] bg-amber-400/80 shadow-[0_0_15px_#FBBF24] top-0 animate-[scan_2.5s_ease-in-out_infinite]"></div>
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Verifying Proof of Personhood</h2>
-              <p className="text-amber-500/60 text-sm uppercase tracking-wide">Biometric Handshake Initiated</p>
-              <div className="mt-8 font-mono text-xs text-slate-500">
-                 Scanning <span className="text-amber-400">{scanning ? '...' : 'Complete'}</span>
+
+              {/* TEXT FEEDBACK */}
+              <div className="text-center space-y-2 mb-8">
+                  <h2 className="text-2xl font-bold text-white">Quantum Bio-Shield</h2>
+                  <div className="flex items-center justify-center gap-2 text-xs font-mono uppercase tracking-widest">
+                      <span className={verificationStage >= 1 ? "text-amber-400" : "text-slate-700"}>Touch</span>
+                      <span className="text-slate-700">→</span>
+                      <span className={verificationStage >= 2 ? "text-cyan-400" : "text-slate-700"}>Retina</span>
+                      <span className="text-slate-700">→</span>
+                      <span className={verificationStage >= 3 ? "text-purple-400" : "text-slate-700"}>Pattern</span>
+                  </div>
               </div>
+
+              {/* PATTERN INTERFACE (Only shows in stage 3) */}
+              {verificationStage === 3 && (
+                  <div className="animate-in slide-in-from-bottom-4 fade-in duration-500">
+                      <p className="text-center text-slate-400 text-xs mb-4">Verify Neural Pattern</p>
+                      <div className="grid grid-cols-3 gap-4 p-4 bg-slate-900/50 rounded-xl border border-slate-800">
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((nodeId) => (
+                              <button
+                                key={nodeId}
+                                onClick={() => handlePatternClick(nodeId)}
+                                className={`w-3 h-3 rounded-full transition-all duration-300 ${patternInput.includes(nodeId) ? 'bg-purple-400 shadow-[0_0_10px_#A855F7] scale-125' : 'bg-slate-700 hover:bg-slate-500'}`}
+                              />
+                          ))}
+                      </div>
+                  </div>
+              )}
+
+              {verificationStage === 4 && (
+                  <div className="text-green-400 font-bold animate-pulse">ACCESS GRANTED</div>
+              )}
             </div>
           )}
 

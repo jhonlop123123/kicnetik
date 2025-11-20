@@ -34,11 +34,11 @@ export interface Post {
   mediaUrl?: string;
   mediaType?: 'image' | 'video';
   likes: number;
-  commentsCount?: number; // Added count
-  timestamp: string; // e.g. "20m ago"
-  createdAt: number; // timestamp in ms for countdown logic
-  isSafe: boolean; // Anti-rug verification badge
-  assetData?: VideoAsset; // Financial data for the video token
+  commentsCount?: number;
+  timestamp: string;
+  createdAt: number;
+  isSafe: boolean;
+  assetData?: VideoAsset;
   challengeTag?: string;
 }
 
@@ -51,13 +51,15 @@ export interface Holding {
   thumbnail: string;
 }
 
-export interface SecurityReport {
-  score: number;
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  liquidityLocked: boolean;
-  mintAuthorityRenounced: boolean;
-  topHoldersPercentage: number;
-  analysis: string;
+export interface Creator {
+  rank: number;
+  name: string;
+  handle: string;
+  avatar: string;
+  marketCap: number;
+  price: number;
+  change24h: number;
+  isVerified: boolean;
 }
 
 export interface WalletContextType {
@@ -79,6 +81,7 @@ export interface UserContextType {
   handle: string;
   avatar: string;
   isBiometricVerified: boolean;
+  updateProfile: (data: { name?: string; handle?: string; avatar?: string }) => void;
   setProfile: (name: string, handle: string) => void;
   verifyBiometrics: () => Promise<void>;
 }
@@ -88,8 +91,24 @@ export const UserContext = React.createContext<UserContextType>({
   handle: "@guest",
   avatar: "",
   isBiometricVerified: false,
+  updateProfile: () => {},
   setProfile: () => {},
   verifyBiometrics: async () => {},
+});
+
+export interface ToastMessage {
+  id: string;
+  title: string;
+  message: string;
+  type: 'success' | 'error' | 'info' | 'gold';
+}
+
+export interface ToastContextType {
+  addToast: (title: string, message: string, type?: ToastMessage['type']) => void;
+}
+
+export const ToastContext = React.createContext<ToastContextType>({
+  addToast: () => {},
 });
 
 declare global {
