@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { ScrollText, Target, Users, Shield, Zap, Mail, ChevronRight, Code, Database, Coins, Copy, Check } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ScrollText, Target, Users, Shield, Zap, Mail, ChevronRight, Code, Database, Coins, Copy, Check, Terminal, Play } from 'lucide-react';
 
 const RUST_CONTRACT_CODE = `use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, MintTo, Burn};
@@ -101,12 +101,49 @@ pub mod kinectic {
 export const Protocol: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'manifesto' | 'architecture'>('manifesto');
   const [copied, setCopied] = useState(false);
+  
+  // Terminal Simulation State
+  const [terminalLines, setTerminalLines] = useState<string[]>([
+      "> Waiting for command...",
+  ]);
+  const [isSimulating, setIsSimulating] = useState(false);
+  const terminalEndRef = useRef<HTMLDivElement>(null);
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(RUST_CONTRACT_CODE);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const runSimulation = () => {
+      if(isSimulating) return;
+      setIsSimulating(true);
+      setTerminalLines(["> anchor build"]);
+      
+      const steps = [
+          { text: "Compiling programs...", delay: 800 },
+          { text: "  Compiling kinectic v0.1.0 (/programs/kinectic)", delay: 1600 },
+          { text: "    Finished release [optimized] target(s) in 2.45s", delay: 2800 },
+          { text: "> anchor deploy --provider.cluster mainnet", delay: 3500 },
+          { text: "Deploying program Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS...", delay: 4500 },
+          { text: "Program Id: Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS", delay: 5500 },
+          { text: "Deploy success", delay: 6000, color: "text-green-400 font-bold" },
+          { text: "> ready for interaction", delay: 6500, color: "text-amber-400 animate-pulse" }
+      ];
+
+      steps.forEach(({ text, delay, color }) => {
+          setTimeout(() => {
+              setTerminalLines(prev => [...prev, color ? `<span class="${color}">${text}</span>` : text]);
+          }, delay);
+      });
+
+      setTimeout(() => setIsSimulating(false), 7000);
+  };
+
+  // Auto scroll terminal
+  useEffect(() => {
+      terminalEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [terminalLines]);
 
   return (
     <div className="max-w-5xl mx-auto pb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -269,6 +306,39 @@ export const Protocol: React.FC = () => {
                     </div>
                 </div>
             </div>
+            
+            {/* --- CONTRACT SIMULATION TERMINAL --- */}
+            <div className="bg-black border border-slate-800 rounded-2xl overflow-hidden shadow-2xl font-mono text-sm relative group">
+                <div className="bg-slate-900 border-b border-slate-800 p-2 px-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <Terminal size={16} className="text-slate-400" />
+                        <span className="text-slate-400">kinectic-cli — anchor deploy</span>
+                    </div>
+                    <div className="flex gap-1.5">
+                        <div className="w-3 h-3 rounded-full bg-red-500/20"></div>
+                        <div className="w-3 h-3 rounded-full bg-yellow-500/20"></div>
+                        <div className="w-3 h-3 rounded-full bg-green-500/20"></div>
+                    </div>
+                </div>
+                
+                <div className="p-4 h-64 overflow-y-auto font-mono text-xs md:text-sm space-y-1 scrollbar-hide">
+                    {terminalLines.map((line, i) => (
+                        <div key={i} dangerouslySetInnerHTML={{ __html: line }} className="text-slate-300" />
+                    ))}
+                    <div ref={terminalEndRef} />
+                </div>
+
+                {!isSimulating && terminalLines.length < 3 && (
+                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                        <button 
+                            onClick={runSimulation}
+                            className="bg-green-600 hover:bg-green-500 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-[0_0_20px_rgba(22,163,74,0.4)] hover:scale-105"
+                        >
+                            <Play size={18} fill="currentColor" /> Simulate Deployment
+                        </button>
+                     </div>
+                )}
+            </div>
 
             {/* Smart Contract Blueprint */}
             <div className="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
@@ -290,25 +360,13 @@ export const Protocol: React.FC = () => {
                     <div className="absolute top-0 right-0 bg-amber-500 text-black text-[10px] font-bold px-2 py-1 rounded-bl-lg opacity-0 group-hover:opacity-100 transition-opacity">
                         SHOW TO DEVELOPER
                     </div>
-                    <pre className="p-6 overflow-x-auto text-xs md:text-sm font-mono text-slate-300 leading-relaxed">
+                    <pre className="p-6 overflow-x-auto text-xs md:text-sm font-mono text-slate-300 leading-relaxed h-64 overflow-y-auto">
                         <code>{RUST_CONTRACT_CODE}</code>
                     </pre>
                 </div>
                 <div className="bg-slate-900 border-t border-slate-800 p-4 text-xs text-slate-500 flex gap-4">
                     <span>• Dependencies: anchor-lang, anchor-spl</span>
                     <span>• License: MIT / Apache-2.0</span>
-                </div>
-            </div>
-
-            <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4 flex gap-3 items-start">
-                <div className="p-2 bg-blue-500/20 rounded-lg">
-                    <Code size={20} className="text-blue-400" />
-                </div>
-                <div>
-                    <h4 className="font-bold text-blue-100 text-sm">Developer Instruction</h4>
-                    <p className="text-xs text-blue-200/70 mt-1">
-                        This code defines the <span className="font-mono text-white">initialize</span>, <span className="font-mono text-white">buy</span>, and <span className="font-mono text-white">sell</span> logic for the Bonding Curve. Implement this in a standard Anchor project structure. Ensure PDA seeds match the client-side derivation.
-                    </p>
                 </div>
             </div>
 
